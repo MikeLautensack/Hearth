@@ -2,7 +2,31 @@ This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-
 
 ## Getting Started
 
-First, run the development server:
+### 1. Set up Supabase
+
+1. Create a project at [Supabase](https://app.supabase.com)
+2. Go to Project Settings > API to get your project URL and anon key
+3. Copy `.env.local.example` to `.env.local`:
+   ```bash
+   cp .env.local.example .env.local
+   ```
+4. Fill in your Supabase credentials in `.env.local`:
+   ```
+   NEXT_PUBLIC_SUPABASE_URL=your_supabase_project_url
+   NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+   ```
+
+### 2. Configure Google OAuth
+
+1. In your Supabase project, go to Authentication > Providers
+2. Enable Google provider
+3. Add your Google OAuth credentials (Client ID and Client Secret)
+   - Get these from [Google Cloud Console](https://console.cloud.google.com/)
+   - Create OAuth 2.0 credentials if needed
+   - Add authorized redirect URI: `https://your-project-ref.supabase.co/auth/v1/callback`
+4. Save the configuration
+
+### 3. Run the development server
 
 ```bash
 npm run dev
