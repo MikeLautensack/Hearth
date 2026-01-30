@@ -1,60 +1,112 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Hearth - Mike's Valheim Server Portal
+
+A web portal for managing access to a private modded Valheim server. Users can request access, and admins can approve or deny requests. Approved users get access to server details, mod installation instructions, and more.
+
+## Features
+
+- **Google OAuth Authentication** - Sign in with Google via Supabase Auth
+- **Access Request System** - Users can request access to the server
+- **Admin Panel** - Approve/deny access requests, manage users, promote to admin
+- **Server Dashboard** - View server address, password, Discord link, and mod profile
+- **Setup Instructions** - Detailed r2modman installation and mod setup guide
+
+## Tech Stack
+
+- **Next.js 16** - React framework with App Router
+- **Supabase** - Authentication and database
+- **Tailwind CSS 4** - Styling
+- **TypeScript** - Type safety
 
 ## Getting Started
 
-### 1. Set up Supabase
+### 1. Clone and Install
 
-1. Create a project at [Supabase](https://app.supabase.com)
-2. Go to Project Settings > API to get your project URL and anon key
-3. Copy `.env.local.example` to `.env.local`:
-   ```bash
-   cp .env.local.example .env.local
-   ```
-4. Fill in your Supabase credentials in `.env.local`:
-   ```
-   NEXT_PUBLIC_SUPABASE_URL=your_supabase_project_url
-   NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
-   ```
+```bash
+git clone <your-repo-url>
+cd hearth
+npm install
+```
 
-### 2. Configure Google OAuth
+### 2. Set Up Supabase
 
-1. In your Supabase project, go to Authentication > Providers
-2. Enable Google provider
-3. Add your Google OAuth credentials (Client ID and Client Secret)
-   - Get these from [Google Cloud Console](https://console.cloud.google.com/)
-   - Create OAuth 2.0 credentials if needed
-   - Add authorized redirect URI: `https://your-project-ref.supabase.co/auth/v1/callback`
-4. Save the configuration
+1. Create a new project at [supabase.com](https://supabase.com)
+2. Go to **Authentication > Providers** and enable Google OAuth
+3. Copy your project URL and anon key from **Settings > API**
 
-### 3. Run the development server
+### 3. Set Up Database
+
+1. Go to **SQL Editor** in your Supabase dashboard
+2. Run the SQL from `supabase-schema.sql` to create the profiles table
+3. After signing in for the first time, run the SQL at the bottom of the schema file to make yourself an admin
+
+### 4. Configure Environment Variables
+
+Copy `.env.example` to `.env.local` and fill in your values:
+
+```bash
+cp .env.example .env.local
+```
+
+```env
+# Supabase Configuration
+NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY=your-anon-key
+
+# Valheim Server Configuration
+VALHEIM_SERVER_HOST=your-server.com:2456
+VALHEIM_SERVER_PASSWORD=your-password
+
+# Discord & Mods
+DISCORD_INVITE_URL=https://discord.gg/your-invite
+MOD_PROFILE_URL=https://thunderstore.io/package/your-profile
+```
+
+### 5. Run Development Server
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000) to see your site.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Making Yourself an Admin
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+After signing in for the first time:
 
-## Learn More
+1. Go to Supabase **SQL Editor**
+2. Find your user ID:
+   ```sql
+   SELECT id, email FROM auth.users;
+   ```
+3. Insert your admin profile:
+   ```sql
+   INSERT INTO profiles (id, email, full_name, role, access_status, access_granted_at)
+   VALUES (
+     'your-user-id-here',
+     'your@email.com',
+     'Mike',
+     'admin',
+     'approved',
+     NOW()
+   );
+   ```
 
-To learn more about Next.js, take a look at the following resources:
+## Pages
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- `/` - Landing page with server info and sign-up CTA
+- `/sign-in` - Google OAuth sign-in
+- `/request-access` - Request access form (for authenticated users)
+- `/dashboard` - Server info for approved users
+- `/admin` - Admin panel for managing access requests
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Deployment
 
-## Deploy on Vercel
+Deploy to Vercel with one click:
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/your-username/hearth)
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Make sure to add your environment variables in the Vercel dashboard.
+
+## License
+
+MIT
