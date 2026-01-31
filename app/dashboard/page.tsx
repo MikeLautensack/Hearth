@@ -64,8 +64,7 @@ export default async function Dashboard() {
     );
   }
 
-  // Server configuration - these would ideally come from a secure config or database
-  // For now using environment variables (you'll set these up)
+  // Server configuration - using environment variables
   const serverConfig = {
     server_host:
       process.env.VALHEIM_SERVER_HOST || "your-server-address.com:2456",
@@ -73,9 +72,6 @@ export default async function Dashboard() {
       process.env.VALHEIM_SERVER_PASSWORD || "your-server-password",
     discord_url:
       process.env.DISCORD_INVITE_URL || "https://discord.gg/your-invite",
-    mod_profile_url:
-      process.env.MOD_PROFILE_URL ||
-      "https://thunderstore.io/package/your-profile",
   };
 
   return (
@@ -192,7 +188,7 @@ export default async function Dashboard() {
             </a>
           </div>
 
-          {/* Mod Profile */}
+          {/* Mod Profile Code */}
           <div className="rounded-xl border border-[#2a2a2a] bg-[#1a1a1a] p-6">
             <div className="mb-4 flex items-center gap-3">
               <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-green-500/10">
@@ -206,36 +202,21 @@ export default async function Dashboard() {
                     strokeLinecap="round"
                     strokeLinejoin="round"
                     strokeWidth={2}
-                    d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
+                    d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"
                   />
                 </svg>
               </div>
-              <h2 className="text-lg font-semibold text-white">Mod Profile</h2>
+              <h2 className="text-lg font-semibold text-white">
+                Mod Profile Code
+              </h2>
             </div>
             <p className="mb-3 text-sm text-gray-400">
-              Download and import the mod profile to get all required mods.
+              Copy this code and import it in r2modman to get all required mods.
             </p>
-            <a
-              href={serverConfig.mod_profile_url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 rounded-lg bg-green-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-green-700"
-            >
-              Download Profile
-              <svg
-                className="h-4 w-4"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
-                />
-              </svg>
-            </a>
+            <CopyableField
+              value="019c11a7-45a4-0ece-06f8-10c05857c494"
+              label="Profile Code"
+            />
           </div>
         </div>
 
@@ -293,10 +274,10 @@ export default async function Dashboard() {
                 <p className="mt-1 text-sm text-gray-400">
                   In r2modman, go to{" "}
                   <strong className="text-white">
-                    Settings → Profile → Import
+                    Settings → Import → From code
                   </strong>{" "}
-                  and select the profile file you downloaded above. This will
-                  install all required mods automatically.
+                  and paste the profile code from above. This will install all
+                  required mods automatically.
                 </p>
               </div>
             </div>
