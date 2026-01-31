@@ -34,7 +34,7 @@ export async function proxy(request: NextRequest) {
   const path = request.nextUrl.pathname
 
   // Protected routes that require authentication
-  const protectedRoutes = ['/dashboard', '/admin', '/request-access']
+  const protectedRoutes = ['/dashboard', '/admin', '/get-access']
   const isProtectedRoute = protectedRoutes.some(route => path.startsWith(route))
 
   // Redirect unauthenticated users to sign-in

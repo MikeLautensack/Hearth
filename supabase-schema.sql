@@ -73,6 +73,54 @@ CREATE INDEX IF NOT EXISTS profiles_access_status_idx ON profiles(access_status)
 CREATE INDEX IF NOT EXISTS profiles_role_idx ON profiles(role);
 
 -- =====================================================
+-- Access Codes Table
+-- =====================================================
+
+CREATE TABLE IF NOT EXISTS access_codes (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  code TEXT NOT NULL UNIQUE,
+  created_by UUID NOT NULL REFERENCES profiles(id),
+  used_by UUID REFERENCES profiles(id),
+  used_at TIMESTAMPTZ,
+  used_by_email TEXT,
+  note TEXT,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+-- Enable Row Level Security
+ALTER TABLE access_codes ENABLE ROW LEVEL SECURITY;
+
+-- Policy: Anyone authenticated can check if a code exists (for redemption)
+CREATE POLICY "Authenticated users can read unused codes"
+  ON access_codes
+  FOR SELECT
+  USING (auth.uid() IS NOT NULL);
+
+-- Policy: Admins can insert new codes
+CREATE POLICY "Admins can create codes"
+  ON access_codes
+  FOR INSERT
+  WITH CHECK (is_admin(auth.uid()));
+
+-- Policy: Users can update codes (to redeem them) or admins can update any
+CREATE POLICY "Users can redeem codes or admins update all"
+  ON access_codes
+  FOR UPDATE
+  USING (
+    (used_by IS NULL AND auth.uid() IS NOT NULL)
+    OR is_admin(auth.uid())
+  );
+
+-- Policy: Admins can delete codes
+CREATE POLICY "Admins can delete codes"
+  ON access_codes
+  FOR DELETE
+  USING (is_admin(auth.uid()));
+
+-- Create index for faster code lookups
+CREATE INDEX IF NOT EXISTS access_codes_code_idx ON access_codes(code);
+
+-- =====================================================
 -- IMPORTANT: Set yourself as the first admin!
 -- =====================================================
 -- After signing in for the first time, run this query

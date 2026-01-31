@@ -23,13 +23,13 @@ export default async function Dashboard() {
     .eq("id", user.id)
     .single<Profile>();
 
-  // If no profile exists or access is pending, redirect to request access page
+  // If no profile exists or access is pending, redirect to get access page
   if (!profile) {
-    redirect("/request-access?error=no-profile");
+    redirect("/get-access");
   }
 
   if (profile.access_status === "pending") {
-    redirect("/request-access?access_status=pending");
+    redirect("/get-access");
   }
 
   if (profile.access_status === "denied") {
