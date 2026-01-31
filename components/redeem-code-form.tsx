@@ -76,32 +76,43 @@ export default function RedeemCodeForm({
 
       // Create or update profile
       if (hasExistingProfile) {
-        const { error: updateError } = await supabase
+        const { error: updateError, data: updateData } = await supabase
           .from("profiles")
           .update({
             access_status: "approved",
             access_granted_at: new Date().toISOString(),
           })
-          .eq("id", userId);
+          .eq("id", userId)
+          .select();
 
         if (updateError) {
           console.error("Error updating profile:", updateError);
           throw updateError;
         }
+        console.log("Profile updated:", updateData);
       } else {
-        const { error: insertError } = await supabase.from("profiles").insert({
-          id: userId,
-          email: userEmail,
-          full_name: userName || null,
-          role: "user",
-          access_status: "approved",
-          access_granted_at: new Date().toISOString(),
-        });
+        const { error: insertError, data: insertData } = await supabase
+          .from("profiles")
+          .insert({
+            id: userId,
+            email: userEmail,
+            full_name: userName || null,
+            role: "user",
+            access_status: "approved",
+            access_granted_at: new Date().toISOString(),
+          })
+          .select();
 
         if (insertError) {
           console.error("Error creating profile:", insertError);
           throw insertError;
         }
+        
+        if (!insertData || insertData.length === 0) {
+          console.error("Profile insert returned no data - RLS may be blocking");
+          throw new Error("Failed to create profile");
+        }
+        console.log("Profile created:", insertData);
       }
 
       // Redirect to dashboard
