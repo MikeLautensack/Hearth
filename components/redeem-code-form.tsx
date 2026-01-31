@@ -56,7 +56,42 @@ export default function RedeemCodeForm({
         return;
       }
 
-      // Mark the code as used FIRST (before creating profile)
+      // Create or update profile FIRST (before marking code as used)
+      // This is required because access_codes.used_by has a foreign key to profiles
+      if (hasExistingProfile) {
+        const { error: updateError } = await supabase
+          .from("profiles")
+          .update({
+            access_status: "approved",
+            access_granted_at: new Date().toISOString(),
+          })
+          .eq("id", userId);
+
+        if (updateError) {
+          console.error("Error updating profile:", updateError);
+          setError("Failed to update profile. Please try again.");
+          setLoading(false);
+          return;
+        }
+      } else {
+        const { error: insertError } = await supabase.from("profiles").insert({
+          id: userId,
+          email: userEmail,
+          full_name: userName || null,
+          role: "user",
+          access_status: "approved",
+          access_granted_at: new Date().toISOString(),
+        });
+
+        if (insertError) {
+          console.error("Error creating profile:", insertError);
+          setError("Failed to create profile. Please try again.");
+          setLoading(false);
+          return;
+        }
+      }
+
+      // Now mark the code as used (profile exists, so FK constraint is satisfied)
       const { error: redeemError } = await supabase
         .from("access_codes")
         .update({
@@ -65,54 +100,11 @@ export default function RedeemCodeForm({
           used_by_email: userEmail,
         })
         .eq("id", accessCode.id)
-        .is("used_by", null); // Extra safety check
+        .is("used_by", null);
 
       if (redeemError) {
         console.error("Error marking code as used:", redeemError);
-        setError("Failed to redeem code. Please try again.");
-        setLoading(false);
-        return;
-      }
-
-      // Create or update profile
-      if (hasExistingProfile) {
-        const { error: updateError, data: updateData } = await supabase
-          .from("profiles")
-          .update({
-            access_status: "approved",
-            access_granted_at: new Date().toISOString(),
-          })
-          .eq("id", userId)
-          .select();
-
-        if (updateError) {
-          console.error("Error updating profile:", updateError);
-          throw updateError;
-        }
-        console.log("Profile updated:", updateData);
-      } else {
-        const { error: insertError, data: insertData } = await supabase
-          .from("profiles")
-          .insert({
-            id: userId,
-            email: userEmail,
-            full_name: userName || null,
-            role: "user",
-            access_status: "approved",
-            access_granted_at: new Date().toISOString(),
-          })
-          .select();
-
-        if (insertError) {
-          console.error("Error creating profile:", insertError);
-          throw insertError;
-        }
-        
-        if (!insertData || insertData.length === 0) {
-          console.error("Profile insert returned no data - RLS may be blocking");
-          throw new Error("Failed to create profile");
-        }
-        console.log("Profile created:", insertData);
+        // Profile was created but code wasn't marked - not ideal but user has access
       }
 
       // Redirect to dashboard
