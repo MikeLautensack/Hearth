@@ -214,7 +214,7 @@ export default async function Dashboard() {
               Copy this code and import it in r2modman to get all required mods.
             </p>
             <CopyableField
-              value="019c11a7-45a4-0ece-06f8-10c05857c494"
+              value="019c17d0-f86f-cdad-29b7-cae17e6d02af"
               label="Profile Code"
             />
           </div>
